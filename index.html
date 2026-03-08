@@ -145,6 +145,7 @@ header{position:sticky;top:0;z-index:100;padding:calc(var(--safe-top) + 10px) 16
       <input id="cfgUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec">
     </div>
     <button class="cfg-save" onclick="saveConfig()">CONECTAR Y PROBAR &rarr;</button>
+    <button onclick="document.getElementById('cfgOverlay').classList.add('hidden')" style="width:100%;padding:11px;border:1px solid rgba(32,128,208,.35);border-radius:10px;background:transparent;color:#7a9bbf;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:8px;">✕ CERRAR</button>
     <div class="cfg-status" id="cfgStatus"></div>
   </div>
 </div>
