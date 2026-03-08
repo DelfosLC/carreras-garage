@@ -317,6 +317,7 @@ header{position:sticky;top:0;z-index:100;padding:calc(var(--safe-top) + 10px) 16
   <div class="nav-item"    id="nav-repuestos" onclick="goPage('repuestos')"><div class="ni">🔩</div><div class="nl">Repuestos</div></div>
   <div class="nav-item"    id="nav-gastos"    onclick="goPage('gastos')">   <div class="ni">📦</div><div class="nl">Gastos</div></div>
   <div class="nav-item"    id="nav-clientes"  onclick="goPage('clientes')"> <div class="ni">👤</div><div class="nl">Clientes</div></div>
+  <div class="nav-item"    id="nav-cuentas"   onclick="goPage('cuentas')">  <div class="ni">💳</div><div class="nl">Cuentas</div></div>
   <div class="nav-item"    id="nav-alertas"   onclick="goPage('alertas')">  <div class="ni">🔔</div><div class="nl">Alertas</div></div>
 </nav>
 <div id="toast"></div>
@@ -330,7 +331,7 @@ const CATS={
   gastos:   {icon:'📦',color:'#818cf8',bg:'rgba(129,140,248,.12)'},
 };
 // ══ PEGÁ TU URL ACÁ ══
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxLdioS54UAFS2q5Vcow3u0ZNRZOy5lZnqq0kHUdZx9jNUbDXlxu3vNlvvq3nNRJHJq/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxGDDhUIQfdWpq4D477lDjDfD6WBhVdABa2NXoizN4z1HCWhinXaPk3Sqx0G4j4hX0F/exec';
 // ═════════════════════
 
 let mesActual='',cache={},clientes=[],alertas=[];
@@ -392,7 +393,7 @@ function loading(show){
 
 async function loadAll(){
   loading(true);
-  await Promise.all([loadMovimientos(mesActual),loadClientes(),loadAlertas()]);
+  await Promise.all([loadMovimientos(mesActual),loadClientes(),loadAlertas(),loadCuentas()]);
   loading(false);
 }
 
@@ -404,7 +405,7 @@ async function loadMovimientos(mes){
 }
 
 async function loadClientes(){
-  try{clientes=await api({action:'getClientes'});renderClientesList();populateClienteSelect();}
+  try{clientes=await api({action:'getClientes'});renderClientesList();populateClienteSelect();populateTClienteSelect();}
   catch(e){clientes=[];}
 }
 
@@ -474,7 +475,7 @@ async function agregarCliente(){
   try{
     const res=await api({action:'addCliente',nombre,telefono});
     clientes.unshift({id:res.id,nombre,telefono});
-    renderClientesList();populateClienteSelect();
+    renderClientesList();populateClienteSelect();populateTClienteSelect();
     document.getElementById('cNombre').value='';document.getElementById('cTel').value='';
     toast('Cliente agregado');
   }catch(e){toast('Error: '+e.message);}
@@ -486,7 +487,7 @@ async function eliminarCliente(id){
   try{
     await api({action:'delCliente',id});
     clientes=clientes.filter(c=>c.id!==id);
-    renderClientesList();populateClienteSelect();await loadAlertas();toast('Cliente eliminado');
+    renderClientesList();populateClienteSelect();populateTClienteSelect();await loadAlertas();toast('Cliente eliminado');
   }catch(e){toast('Error al eliminar');}
 }
 
@@ -627,6 +628,185 @@ function goPage(name){
   document.getElementById('page-'+name).classList.add('on');
   document.getElementById('nav-'+name).classList.add('on');
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+
+// ── CUENTAS CORRIENTES ───────────────────
+let cuentas = [];
+let pagoActivoTrabajoId = null;
+let pagoActivoClienteId = null;
+let pagoActivoSaldo = 0;
+
+async function loadCuentas() {
+  try {
+    cuentas = await api({ action: 'getCuentas' });
+    renderCuentas();
+    populateTClienteSelect();
+  } catch(e) { cuentas = []; }
+}
+
+function populateTClienteSelect() {
+  document.getElementById('tCliente').innerHTML =
+    '<option value="">— Seleccioná cliente —</option>' +
+    clientes.map(c => `<option value="${c.id}">${c.nombre}${c.telefono ? ' — ' + c.telefono : ''}</option>`).join('');
+}
+
+async function agregarTrabajo() {
+  const cliente_id  = document.getElementById('tCliente').value;
+  const descripcion = document.getElementById('tDesc').value.trim();
+  const total       = parseFloat(document.getElementById('tTotal').value);
+  const fecha       = document.getElementById('tFecha').value;
+  const notas       = document.getElementById('tNotas').value.trim();
+  if (!cliente_id)  { toast('❌ Seleccioná un cliente'); return; }
+  if (!descripcion) { toast('❌ Ingresá la descripción'); return; }
+  if (!total || total <= 0) { toast('❌ Ingresá el total'); return; }
+  if (!fecha) { toast('❌ Seleccioná una fecha'); return; }
+  const cliente_nombre = clientes.find(c => c.id == cliente_id)?.nombre || '';
+  const btn = document.getElementById('btnTrabajo');
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>GUARDANDO...';
+  try {
+    await api({ action: 'addTrabajo', cliente_id, cliente_nombre, descripcion, total, fecha, notas });
+    ['tDesc','tNotas'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('tTotal').value = '';
+    document.getElementById('tCliente').value = '';
+    await loadCuentas();
+    toast('✅ Trabajo registrado');
+  } catch(e) { toast('❌ Error: ' + e.message); }
+  btn.disabled = false; btn.textContent = 'REGISTRAR TRABAJO';
+}
+
+async function eliminarTrabajo(id) {
+  if (!confirm('¿Eliminar este trabajo y todos sus pagos?')) return;
+  try {
+    await api({ action: 'delTrabajo', id });
+    await loadCuentas();
+    toast('🗑️ Eliminado');
+  } catch(e) { toast('❌ Error'); }
+}
+
+function openPagoModal(trabajo_id, cliente_id, saldo) {
+  pagoActivoTrabajoId = trabajo_id;
+  pagoActivoClienteId = cliente_id;
+  pagoActivoSaldo = saldo;
+  document.getElementById('pagoModalSub').textContent = 'Saldo pendiente: ' + fmt(saldo);
+  document.getElementById('pagoMonto').value = '';
+  document.getElementById('pagoNotas').value = '';
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('pagoFecha').value = hoy;
+  const modal = document.getElementById('pagoModal');
+  modal.style.display = 'flex';
+  setTimeout(() => document.getElementById('pagoMonto').focus(), 100);
+}
+
+function closePagoModal() {
+  document.getElementById('pagoModal').style.display = 'none';
+  pagoActivoTrabajoId = null;
+}
+
+async function confirmarPago() {
+  const monto = parseFloat(document.getElementById('pagoMonto').value);
+  const fecha = document.getElementById('pagoFecha').value;
+  const notas = document.getElementById('pagoNotas').value.trim();
+  if (!monto || monto <= 0) { toast('❌ Ingresá un monto'); return; }
+  if (monto > pagoActivoSaldo + 0.01) { toast('❌ El pago supera el saldo pendiente'); return; }
+  if (!fecha) { toast('❌ Seleccioná una fecha'); return; }
+  const btn = document.getElementById('btnPago');
+  btn.disabled = true; btn.textContent = 'GUARDANDO...';
+  try {
+    await api({ action: 'addPago', trabajo_id: pagoActivoTrabajoId, cliente_id: pagoActivoClienteId, monto, fecha, notas });
+    closePagoModal();
+    await loadCuentas();
+    toast('✅ Pago registrado');
+  } catch(e) { toast('❌ Error: ' + e.message); }
+  btn.disabled = false; btn.textContent = '✓ CONFIRMAR PAGO';
+}
+
+function renderCuentas() {
+  const el = document.getElementById('cuentasList');
+
+  // Separar con deuda vs saldados
+  const conDeuda  = cuentas.filter(c => c.total_saldo > 0.01);
+  const saldados  = cuentas.filter(c => c.total_saldo <= 0.01);
+
+  if (!conDeuda.length && !saldados.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-ico">💳</div><p>Sin cuentas registradas</p></div>';
+    return;
+  }
+
+  let html = '';
+
+  // Totales generales
+  const totalDeuda = conDeuda.reduce((s, c) => s + c.total_saldo, 0);
+  if (totalDeuda > 0) {
+    html += `<div style="background:linear-gradient(135deg,rgba(240,82,82,.1),rgba(240,82,82,.05));border:1px solid rgba(240,82,82,.3);border-radius:14px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:2px;margin-bottom:3px;">Total a cobrar</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;color:var(--red);">${fmt(totalDeuda)}</div>
+      </div>
+      <div style="font-size:36px;">💸</div>
+    </div>`;
+  }
+
+  conDeuda.forEach(c => { html += clienteCuentaHTML(c, true); });
+
+  if (saldados.length) {
+    html += `<div class="stitle" style="margin-top:20px;">✅ Saldados</div>`;
+    saldados.forEach(c => { html += clienteCuentaHTML(c, false); });
+  }
+
+  el.innerHTML = html;
+}
+
+function clienteCuentaHTML(c, tieneDeuda) {
+  const pct = c.total_trabajos > 0 ? Math.min((c.total_pagado / c.total_trabajos) * 100, 100) : 100;
+  const barColor = tieneDeuda ? 'var(--amber)' : 'var(--green)';
+
+  let trabajosHTML = c.trabajos.map(t => {
+    const tPct = t.total > 0 ? Math.min((t.pagado / t.total) * 100, 100) : 100;
+    const pagosHTML = t.pagos.length ? t.pagos.map(p =>
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);">
+        <span style="font-size:11px;color:var(--text2);">💵 ${fmtF(p.fecha)}${p.notas ? ' · ' + p.notas : ''}</span>
+        <span style="font-size:12px;color:var(--green);font-weight:600;">+${fmt(p.monto)}</span>
+      </div>`).join('') : '';
+
+    return `<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin-bottom:7px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:7px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:2px;">${t.descripcion}</div>
+          <div style="font-size:11px;color:var(--text2);">${fmtF(t.fecha)}${t.notas ? ' · ' + t.notas : ''}</div>
+        </div>
+        <button onclick="eliminarTrabajo(${t.id})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 4px;flex-shrink:0;">✕</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;font-size:11px;">
+        <span style="color:var(--text2);">Total: <strong style="color:var(--text)">${fmt(t.total)}</strong></span>
+        <span style="color:var(--text2);">Pagado: <strong style="color:var(--green)">${fmt(t.pagado)}</strong></span>
+        ${t.saldo > 0.01 ? `<span style="color:var(--text2);">Debe: <strong style="color:var(--red)">${fmt(t.saldo)}</strong></span>` : '<span style="color:var(--green);font-weight:600;">✓ Saldado</span>'}
+      </div>
+      <div style="background:rgba(255,255,255,.05);border-radius:4px;height:6px;overflow:hidden;margin-bottom:${t.saldo > 0.01 ? '8' : '0'}px;">
+        <div style="height:100%;width:${tPct.toFixed(1)}%;background:${t.saldo > 0.01 ? 'var(--amber)' : 'var(--green)'};border-radius:4px;transition:width .5s ease;"></div>
+      </div>
+      ${pagosHTML}
+      ${t.saldo > 0.01 ? `<button onclick="openPagoModal(${t.id},${t.cliente_id},${t.saldo})" style="width:100%;margin-top:8px;padding:9px;border:1px solid rgba(34,197,94,.35);border-radius:8px;background:rgba(34,197,94,.08);color:var(--green);font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;cursor:pointer;">+ REGISTRAR PAGO PARCIAL</button>` : ''}
+    </div>`;
+  }).join('');
+
+  return `<div style="background:var(--s1);border:1px solid ${tieneDeuda ? 'rgba(240,82,82,.25)' : 'var(--border)'};border-radius:14px;padding:14px;margin-bottom:10px;animation:slideIn .18s ease;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+      <div style="width:38px;height:38px;border-radius:10px;background:var(--blue-dim);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;">👤</div>
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:15px;">${c.cliente_nombre}</div>
+        <div style="font-size:11px;color:var(--text2);">${c.trabajos.length} trabajo${c.trabajos.length !== 1 ? 's' : ''}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:${tieneDeuda ? 'var(--red)' : 'var(--green)'};">${fmt(c.total_saldo)}</div>
+        <div style="font-size:10px;color:var(--text2);">${tieneDeuda ? 'pendiente' : 'saldado'}</div>
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,.05);border-radius:5px;height:8px;overflow:hidden;margin-bottom:12px;">
+      <div style="height:100%;width:${pct.toFixed(1)}%;background:${barColor};border-radius:5px;transition:width .5s ease;"></div>
+    </div>
+    ${trabajosHTML}
+  </div>`;
 }
 
 function toast(msg,dur=2800){
