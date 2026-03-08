@@ -324,10 +324,16 @@ const CATS={
   repuestos:{icon:'&#128297;',color:'#f59e0b',bg:'rgba(245,158,11,.12)'},
   gastos:   {icon:'&#128230;',color:'#818cf8',bg:'rgba(129,140,248,.12)'},
 };
-let SCRIPT_URL=localStorage.getItem('cg_script_url')||'';
+// ══ PEGÁ TU URL ACÁ ══
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxLdioS54UAFS2q5Vcow3u0ZNRZOy5lZnqq0kHUdZx9jNUbDXlxu3vNlvvq3nNRJHJq/exec';
+// ═════════════════════
+
 let mesActual='',cache={},clientes=[],alertas=[];
 
 (function init(){
+  // Ocultar config overlay — URL ya está hardcodeada
+  document.getElementById('cfgOverlay').classList.add('hidden');
+  
   const sel=document.getElementById('mesSelect');
   const now=new Date();
   mesActual=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
@@ -340,7 +346,7 @@ let mesActual='',cache={},clientes=[],alertas=[];
   }
   const hoy=new Date().toISOString().split('T')[0];
   ['iFecha','eFecha','rFecha','gFecha','sFecha'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=hoy;});
-  if(SCRIPT_URL){document.getElementById('cfgOverlay').classList.add('hidden');loadAll();}
+  loadAll();
 })();
 
 async function saveConfig(){
