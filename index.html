@@ -163,7 +163,7 @@ header{position:sticky;top:0;z-index:100;padding:calc(var(--safe-top) + 10px) 16
 <div id="loadingBar"></div>
 
 <div id="alertBanner" onclick="goPage('alertas')">
-  <div class="ab-ico">&#128276;</div>
+  <div class="ab-ico">🔔</div>
   <div class="ab-text">
     <strong id="abTitle">Services proximos a vencer</strong>
     <span id="abSub">Toca para ver y avisar a los clientes</span>
@@ -177,13 +177,13 @@ header{position:sticky;top:0;z-index:100;padding:calc(var(--safe-top) + 10px) 16
       <div class="bh-label">Balance del mes</div>
       <div class="bh-num" id="balNum">$0</div>
       <div class="bh-sub" id="balSub">Cargando...</div>
-      <div class="bh-emoji" id="balEmoji">&#128528;</div>
+      <div class="bh-emoji" id="balEmoji">😐</div>
     </div>
     <div class="stat-grid">
-      <div class="stat-card" style="--c:#22c55e"><div class="sc-label">&#128176; Ingresos</div><div class="sc-val" id="sIng">$0</div></div>
-      <div class="stat-card" style="--c:#3b82f6"><div class="sc-label">&#128119; Empleados</div><div class="sc-val" id="sEmp">$0</div></div>
-      <div class="stat-card" style="--c:#f59e0b"><div class="sc-label">&#128297; Repuestos</div><div class="sc-val" id="sRep">$0</div></div>
-      <div class="stat-card" style="--c:#818cf8"><div class="sc-label">&#128230; Gastos</div><div class="sc-val" id="sGas">$0</div></div>
+      <div class="stat-card" style="--c:#22c55e"><div class="sc-label">💰 Ingresos</div><div class="sc-val" id="sIng">$0</div></div>
+      <div class="stat-card" style="--c:#3b82f6"><div class="sc-label">👷 Empleados</div><div class="sc-val" id="sEmp">$0</div></div>
+      <div class="stat-card" style="--c:#f59e0b"><div class="sc-label">🔩 Repuestos</div><div class="sc-val" id="sRep">$0</div></div>
+      <div class="stat-card" style="--c:#818cf8"><div class="sc-label">📦 Gastos</div><div class="sc-val" id="sGas">$0</div></div>
     </div>
     <div class="chart-card">
       <div class="card-title">Distribucion egresos</div>
@@ -306,23 +306,23 @@ header{position:sticky;top:0;z-index:100;padding:calc(var(--safe-top) + 10px) 16
 </div>
 
 <nav class="bottom-nav">
-  <div class="nav-item on" id="nav-resumen"   onclick="goPage('resumen')">  <div class="ni">&#128202;</div><div class="nl">Resumen</div></div>
-  <div class="nav-item"    id="nav-ingresos"  onclick="goPage('ingresos')"> <div class="ni">&#128176;</div><div class="nl">Ingresos</div></div>
-  <div class="nav-item"    id="nav-empleados" onclick="goPage('empleados')"><div class="ni">&#128119;</div><div class="nl">Empleados</div></div>
-  <div class="nav-item"    id="nav-repuestos" onclick="goPage('repuestos')"><div class="ni">&#128297;</div><div class="nl">Repuestos</div></div>
-  <div class="nav-item"    id="nav-gastos"    onclick="goPage('gastos')">   <div class="ni">&#128230;</div><div class="nl">Gastos</div></div>
-  <div class="nav-item"    id="nav-clientes"  onclick="goPage('clientes')"> <div class="ni">&#128100;</div><div class="nl">Clientes</div></div>
-  <div class="nav-item"    id="nav-alertas"   onclick="goPage('alertas')">  <div class="ni">&#128276;</div><div class="nl">Alertas</div></div>
+  <div class="nav-item on" id="nav-resumen"   onclick="goPage('resumen')">  <div class="ni">📊</div><div class="nl">Resumen</div></div>
+  <div class="nav-item"    id="nav-ingresos"  onclick="goPage('ingresos')"> <div class="ni">💰</div><div class="nl">Ingresos</div></div>
+  <div class="nav-item"    id="nav-empleados" onclick="goPage('empleados')"><div class="ni">👷</div><div class="nl">Empleados</div></div>
+  <div class="nav-item"    id="nav-repuestos" onclick="goPage('repuestos')"><div class="ni">🔩</div><div class="nl">Repuestos</div></div>
+  <div class="nav-item"    id="nav-gastos"    onclick="goPage('gastos')">   <div class="ni">📦</div><div class="nl">Gastos</div></div>
+  <div class="nav-item"    id="nav-clientes"  onclick="goPage('clientes')"> <div class="ni">👤</div><div class="nl">Clientes</div></div>
+  <div class="nav-item"    id="nav-alertas"   onclick="goPage('alertas')">  <div class="ni">🔔</div><div class="nl">Alertas</div></div>
 </nav>
 <div id="toast"></div>
 
 <script>
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const CATS={
-  ingresos: {icon:'&#128176;',color:'#22c55e',bg:'rgba(34,197,94,.12)'},
-  empleados:{icon:'&#128119;',color:'#3b82f6',bg:'rgba(59,130,246,.12)'},
-  repuestos:{icon:'&#128297;',color:'#f59e0b',bg:'rgba(245,158,11,.12)'},
-  gastos:   {icon:'&#128230;',color:'#818cf8',bg:'rgba(129,140,248,.12)'},
+  ingresos: {icon:'💰',color:'#22c55e',bg:'rgba(34,197,94,.12)'},
+  empleados:{icon:'👷',color:'#3b82f6',bg:'rgba(59,130,246,.12)'},
+  repuestos:{icon:'🔩',color:'#f59e0b',bg:'rgba(245,158,11,.12)'},
+  gastos:   {icon:'📦',color:'#818cf8',bg:'rgba(129,140,248,.12)'},
 };
 // ══ PEGÁ TU URL ACÁ ══
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxLdioS54UAFS2q5Vcow3u0ZNRZOy5lZnqq0kHUdZx9jNUbDXlxu3vNlvvq3nNRJHJq/exec';
@@ -532,7 +532,7 @@ function renderResumen(d){
   document.getElementById('sGas').textContent=fmt(gas);
   const nb=document.getElementById('balNum');
   nb.textContent=fmt(bal);nb.style.color=bal>0?'var(--green)':bal<0?'var(--red)':'var(--blue2)';
-  document.getElementById('balEmoji').textContent=bal>0?'&#129297;':bal<0?'&#128556;':'&#128528;';
+  document.getElementById('balEmoji').textContent=bal>0?'🤑':bal<0?'😬':'😐';
   document.getElementById('balSub').textContent='Egresos: '+fmt(egr);
   const maxE=Math.max(emp,rep,gas,1);
   document.getElementById('chartArea').innerHTML=[
@@ -546,7 +546,7 @@ function renderResumen(d){
   ].sort((a,b)=>b.id-a.id).slice(0,6);
   document.getElementById('lastMoves').innerHTML=todos.length
     ?todos.map(e=>entryHTML(e,e.cat,false)).join('')
-    :'<div class="empty"><div class="empty-ico">&#128217;</div><p>Sin movimientos este mes</p></div>';
+    :'<div class="empty"><div class="empty-ico">📭</div><p>Sin movimientos este mes</p></div>';
 }
 
 function renderListas(d){
@@ -567,7 +567,7 @@ function entryHTML(e,cat,showDel){
       <div class="e-meta">${fmtF(e.fecha)}${e.extra?' &middot; '+e.extra:''}</div>
     </div>
     <div class="e-amt" style="color:${c.color}">${fmt(e.monto)}</div>
-    ${showDel?`<button class="e-del" onclick="eliminarMov('${cat}',${e.id})">&#10005;</button>`:''}
+    ${showDel?`<button class="e-del" onclick="eliminarMov('${cat}',${e.id})">✕</button>`:''}
   </div>`;
 }
 
@@ -578,13 +578,13 @@ function populateClienteSelect(){
 
 function renderClientesList(){
   const el=document.getElementById('clientesList');
-  if(!clientes.length){el.innerHTML='<div class="empty"><div class="empty-ico">&#128100;</div><p>Sin clientes registrados</p></div>';return;}
-  el.innerHTML=clientes.map(c=>`<div class="client-card"><div class="cc-head"><div class="cc-avatar">&#128100;</div><div><div class="cc-name">${c.nombre}</div><div class="cc-phone">${c.telefono||'Sin telefono'}</div></div><button class="cc-del" onclick="eliminarCliente(${c.id})">&#10005;</button></div></div>`).join('');
+  if(!clientes.length){el.innerHTML='<div class="empty"><div class="empty-ico">👤</div><p>Sin clientes registrados</p></div>';return;}
+  el.innerHTML=clientes.map(c=>`<div class="client-card"><div class="cc-head"><div class="cc-avatar">👤</div><div><div class="cc-name">${c.nombre}</div><div class="cc-phone">${c.telefono||'Sin telefono'}</div></div><button class="cc-del" onclick="eliminarCliente(${c.id})">✕</button></div></div>`).join('');
 }
 
 function renderAlertas(){
   const el=document.getElementById('alertasList');
-  if(!alertas.length){el.innerHTML='<div class="empty"><div class="empty-ico">&#127881;</div><p>Todo al dia - sin alertas pendientes</p></div>';return;}
+  if(!alertas.length){el.innerHTML='<div class="empty"><div class="empty-ico">🎉</div><p>Todo al dia - sin alertas pendientes</p></div>';return;}
   el.innerHTML=alertas.map(a=>{
     const dias=a.dias;
     const color=dias<=0?'var(--red)':dias<=7?'var(--amber)':'var(--blue2)';
@@ -594,11 +594,11 @@ function renderAlertas(){
     const msg=encodeURIComponent(`Hola ${a.cliente_nombre}! Te contactamos desde Carreras Garage.\n\nTu ${a.vehiculo||'vehiculo'} esta proximo al service de "${a.descripcion}".\n\nCuando te viene bien pasar? Te esperamos!`);
     const waUrl=tel?`https://wa.me/54${tel}?text=${msg}`:null;
     return `<div class="alert-card">
-      <div class="ac-head"><div class="ac-ico">&#128276;</div><div><div class="ac-name">${a.cliente_nombre}</div><div class="ac-veh">${a.vehiculo||'Vehiculo no especificado'}</div></div><div class="ac-badge" style="color:${color};background:${bgBadge}">${badge}</div></div>
-      <div class="ac-detail"><strong>${a.descripcion}</strong><br>Ultimo service: ${fmtF(a.fecha_service)} &middot; Alerta: ${fmtF(a.fecha_alerta)}${a.notas?'<br>&#128221; '+a.notas:''}</div>
+      <div class="ac-head"><div class="ac-ico">🔔</div><div><div class="ac-name">${a.cliente_nombre}</div><div class="ac-veh">${a.vehiculo||'Vehiculo no especificado'}</div></div><div class="ac-badge" style="color:${color};background:${bgBadge}">${badge}</div></div>
+      <div class="ac-detail"><strong>${a.descripcion}</strong><br>Ultimo service: ${fmtF(a.fecha_service)} &middot; Alerta: ${fmtF(a.fecha_alerta)}${a.notas?'<br>📝 '+a.notas:''}</div>
       <div class="ac-actions">
-        ${waUrl?`<button class="ac-btn wa" onclick="window.open('${waUrl}','_blank')">&#128241; WhatsApp</button>`:`<button class="ac-btn wa" disabled style="opacity:.4">Sin tel.</button>`}
-        <button class="ac-btn done" onclick="marcarAlertaEnviada(${a.id})">&#10003; Contactado</button>
+        ${waUrl?`<button class="ac-btn wa" onclick="window.open('${waUrl}','_blank')">📱 WhatsApp</button>`:`<button class="ac-btn wa" disabled style="opacity:.4">Sin tel.</button>`}
+        <button class="ac-btn done" onclick="marcarAlertaEnviada(${a.id})">✓ Contactado</button>
       </div>
     </div>`;
   }).join('');
