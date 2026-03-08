@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#080f1a">
+<title>Carreras Garage</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#080f1a;--s1:#0d1929;--s2:#112038;--s3:#172844;
+  --border:rgba(32,128,208,.18);--border2:rgba(32,128,208,.35);
+  --blue:#2080D0;--blue2:#3a9fe8;--blue-dim:rgba(32,128,208,.12);
+  --green:#22c55e;--red:#f05252;--amber:#f59e0b;--purple:#818cf8;
+  --text:#e8f0fa;--text2:#7a9bbf;--text3:#3d5a7a;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);--tab-h:62px;
+}
+html{height:100%;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100dvh;padding-bottom:calc(var(--tab-h) + var(--safe-bot));overflow-x:hidden;}
+#cfgOverlay{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;padding-top:calc(var(--safe-top) + 24px);}
+#cfgOverlay.hidden{display:none;}
+.cfg-box{width:100%;max-width:420px;background:var(--s1);border:1px solid var(--border2);border-radius:20px;padding:28px 24px;}
+.cfg-logo{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
+.cfg-logo-text strong{display:block;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;letter-spacing:2px;}
+.cfg-logo-text span{font-size:10px;letter-spacing:3px;color:var(--text2);}
+.cfg-box h2{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;letter-spacing:1px;color:var(--blue2);margin-bottom:6px;}
+.cfg-box p{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:18px;}
+.cfg-field{margin-bottom:12px;}
+.cfg-field label{display:block;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;}
+.cfg-field input{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:11px 13px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.cfg-field input:focus{border-color:var(--blue2);}
+.cfg-save{width:100%;padding:13px;border:none;border-radius:10px;background:var(--blue);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:4px;}
+.cfg-save:hover{background:var(--blue2);}
+.cfg-status{font-size:12px;text-align:center;margin-top:10px;min-height:18px;color:var(--text2);}
+header{position:sticky;top:0;z-index:100;padding:calc(var(--safe-top) + 10px) 16px 10px;background:rgba(8,15,26,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.h-logo{display:flex;align-items:center;gap:10px;}
+.h-logo-t strong{display:block;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;letter-spacing:2px;line-height:1.1;}
+.h-logo-t span{display:block;font-size:8px;letter-spacing:3px;color:var(--text2);margin-top:1px;}
+.h-right{display:flex;align-items:center;gap:8px;}
+.h-mes{background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:6px 10px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;outline:none;}
+.h-mes option{background:#0d1929;}
+.h-cfg{width:32px;height:32px;border-radius:8px;background:var(--s2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;}
+#alertBanner{margin:10px 14px 0;background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(245,158,11,.06));border:1px solid rgba(245,158,11,.35);border-radius:12px;padding:11px 14px;display:none;cursor:pointer;animation:pulseBorder 2s ease infinite;}
+#alertBanner.show{display:flex;align-items:center;gap:10px;}
+@keyframes pulseBorder{0%,100%{border-color:rgba(245,158,11,.35);}50%{border-color:rgba(245,158,11,.75);}}
+.ab-ico{font-size:20px;flex-shrink:0;}
+.ab-text strong{display:block;font-size:13px;font-weight:600;color:var(--amber);}
+.ab-text span{font-size:11px;color:var(--text2);}
+.ab-arr{color:var(--amber);font-size:18px;margin-left:auto;}
+.content{padding:12px 14px;max-width:500px;margin:0 auto;}
+.page{display:none;}.page.on{display:block;}
+.balance-hero{background:linear-gradient(135deg,var(--s2) 0%,var(--s3) 100%);border:1px solid var(--border2);border-radius:18px;padding:20px;margin-bottom:12px;position:relative;overflow:hidden;}
+.balance-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;background:radial-gradient(circle,rgba(32,128,208,.18),transparent 70%);pointer-events:none;}
+.bh-label{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;}
+.bh-num{font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:800;line-height:1;letter-spacing:-1px;}
+.bh-sub{font-size:11px;color:var(--text2);margin-top:5px;}
+.bh-emoji{position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:42px;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px;}
+.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:13px 14px;border-top:2px solid var(--c,var(--blue));}
+.sc-label{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}
+.sc-val{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:var(--c,var(--blue));}
+.chart-card,.moves-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:var(--text2);margin-bottom:12px;}
+.ch-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.ch-row:last-child{margin-bottom:0;}
+.ch-lbl{font-size:11px;color:var(--text2);width:88px;flex-shrink:0;text-align:right;}
+.ch-track{flex:1;background:rgba(255,255,255,.05);border-radius:5px;height:20px;overflow:hidden;}
+.ch-fill{height:100%;border-radius:5px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+.ch-val{font-size:11px;color:var(--text2);width:70px;text-align:right;flex-shrink:0;}
+.form-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;}
+.fc-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue2);margin-bottom:14px;}
+.f-row{margin-bottom:10px;}
+.f-label{display:block;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;}
+.f-inp{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 12px;color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;outline:none;transition:border-color .2s;-webkit-appearance:none;}
+.f-inp:focus{border-color:var(--blue2);}
+.f-inp::placeholder{color:var(--text3);}
+.f-inp[type=number]{-moz-appearance:textfield;}
+.f-inp[type=number]::-webkit-inner-spin-button{display:none;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.btn-primary{width:100%;padding:13px;border:none;border-radius:10px;background:var(--blue);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:background .15s;-webkit-appearance:none;}
+.btn-primary:hover{background:var(--blue2);}
+.btn-primary:active{opacity:.85;}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed;}
+.stitle{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:var(--text2);margin:16px 0 8px;}
+.entry-list{display:flex;flex-direction:column;gap:7px;}
+.entry{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:10px;animation:slideIn .18s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:translateY(0);}}
+.e-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.e-body{flex:1;min-width:0;}
+.e-desc{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.e-meta{font-size:11px;color:var(--text2);margin-top:2px;}
+.e-amt{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;flex-shrink:0;}
+.e-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px 5px;border-radius:5px;flex-shrink:0;transition:color .15s;}
+.e-del:hover{color:var(--red);}
+.empty{text-align:center;padding:36px 20px;color:var(--text3);}
+.empty-ico{font-size:34px;margin-bottom:8px;}
+.empty p{font-size:13px;}
+.client-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:8px;animation:slideIn .18s ease;}
+.cc-head{display:flex;align-items:center;gap:10px;}
+.cc-avatar{width:38px;height:38px;border-radius:10px;background:var(--blue-dim);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.cc-name{font-weight:600;font-size:14px;}
+.cc-phone{font-size:11px;color:var(--text2);margin-top:1px;}
+.cc-del{margin-left:auto;background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:4px;}
+.cc-del:hover{color:var(--red);}
+.alert-card{background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(245,158,11,.04));border:1px solid rgba(245,158,11,.3);border-radius:14px;padding:14px;margin-bottom:8px;animation:slideIn .18s ease;}
+.ac-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.ac-ico{font-size:22px;flex-shrink:0;}
+.ac-name{font-weight:600;font-size:14px;}
+.ac-veh{font-size:11px;color:var(--text2);margin-top:1px;}
+.ac-badge{margin-left:auto;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap;}
+.ac-detail{font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.5;}
+.ac-actions{display:flex;gap:8px;}
+.ac-btn{flex:1;padding:9px;border-radius:8px;border:none;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;cursor:pointer;}
+.ac-btn.wa{background:rgba(37,211,102,.12);color:#25d366;border:1px solid rgba(37,211,102,.3);}
+.ac-btn.done{background:var(--blue-dim);color:var(--blue2);border:1px solid var(--border2);}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;height:calc(var(--tab-h) + var(--safe-bot));background:rgba(8,15,26,.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);display:flex;align-items:flex-start;padding-top:6px;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px 2px;color:var(--text3);user-select:none;-webkit-user-select:none;position:relative;transition:color .15s;}
+.nav-item.on{color:var(--blue2);}
+.ni{font-size:20px;line-height:1;}
+.nl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
+.nav-badge{position:absolute;top:2px;right:calc(50% - 20px);background:var(--amber);color:#000;font-size:9px;font-weight:800;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+#toast{position:fixed;bottom:calc(var(--tab-h) + var(--safe-bot) + 12px);left:50%;transform:translateX(-50%) translateY(10px);background:var(--s2);border:1px solid var(--border2);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:500;opacity:0;transition:all .25s;z-index:300;white-space:nowrap;pointer-events:none;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#loadingBar{position:fixed;top:0;left:0;height:2px;background:var(--blue2);width:0;z-index:999;transition:width .3s ease,opacity .3s;}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes sp{to{transform:rotate(360deg);}}
+::-webkit-scrollbar{width:0;}
+</style>
+</head>
+<body>
+
+<div id="cfgOverlay">
+  <div class="cfg-box">
+    <div class="cfg-logo">
+      <svg width="48" height="48" viewBox="0 0 100 100"><defs><radialGradient id="rg" cx="50%" cy="45%" r="55%"><stop offset="0%" stop-color="#2080D0"/><stop offset="100%" stop-color="#0D4578"/></radialGradient></defs><circle cx="50" cy="50" r="48" fill="url(#rg)"/><g transform="translate(50,38)" fill="white"><path d="M-2,-14 L2,-14 L3,-11 A12,12 0 0,1 6,-10 L9,-12 L12,-9 L10,-6 A12,12 0 0,1 11,-3 L14,-2 L14,2 L11,3 A12,12 0 0,1 10,6 L12,9 L9,12 L6,10 A12,12 0 0,1 3,11 L2,14 L-2,14 L-3,11 A12,12 0 0,1 -6,10 L-9,12 L-12,9 L-10,6 A12,12 0 0,1 -11,3 L-14,2 L-14,-2 L-11,-3 A12,12 0 0,1 -10,-6 L-12,-9 L-9,-12 L-6,-10 A12,12 0 0,1 -3,-11 Z"/><circle cx="0" cy="0" r="5" fill="#1E73BE"/><rect x="-2" y="-4" width="4" height="6" rx="1"/><rect x="-3" y="-6" width="6" height="3" rx="1"/><rect x="-1" y="2" width="2" height="3" rx=".5"/></g><text x="50" y="68" text-anchor="middle" font-family="Arial Black" font-size="11" font-weight="900" fill="white" letter-spacing="1.5">CARRERAS</text><text x="50" y="79" text-anchor="middle" font-family="Arial Black" font-size="11" font-weight="900" fill="white" letter-spacing="1.5">GARAGE</text></svg>
+      <div class="cfg-logo-text"><strong>CARRERAS GARAGE</strong><span>MECÁNICA AUTOMOTRIZ</span></div>
+    </div>
+    <h2>Conectar Google Sheets</h2>
+    <p>Pegá la URL de tu Google Apps Script. La obtenés en <strong>Extensiones &rarr; Apps Script &rarr; Implementar &rarr; Nueva implementación</strong>.</p>
+    <div class="cfg-field">
+      <label>URL del Apps Script</label>
+      <input id="cfgUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec">
+    </div>
+    <button class="cfg-save" onclick="saveConfig()">CONECTAR Y PROBAR &rarr;</button>
+    <div class="cfg-status" id="cfgStatus"></div>
+  </div>
+</div>
+
+<header>
+  <div class="h-logo">
+    <svg width="36" height="36" viewBox="0 0 100 100"><defs><radialGradient id="rg2" cx="50%" cy="45%" r="55%"><stop offset="0%" stop-color="#2080D0"/><stop offset="100%" stop-color="#0D4578"/></radialGradient></defs><circle cx="50" cy="50" r="48" fill="url(#rg2)"/><g transform="translate(50,38)" fill="white"><path d="M-2,-14 L2,-14 L3,-11 A12,12 0 0,1 6,-10 L9,-12 L12,-9 L10,-6 A12,12 0 0,1 11,-3 L14,-2 L14,2 L11,3 A12,12 0 0,1 10,6 L12,9 L9,12 L6,10 A12,12 0 0,1 3,11 L2,14 L-2,14 L-3,11 A12,12 0 0,1 -6,10 L-9,12 L-12,9 L-10,6 A12,12 0 0,1 -11,3 L-14,2 L-14,-2 L-11,-3 A12,12 0 0,1 -10,-6 L-12,-9 L-9,-12 L-6,-10 A12,12 0 0,1 -3,-11 Z"/><circle cx="0" cy="0" r="5" fill="#1E73BE"/><rect x="-2" y="-4" width="4" height="6" rx="1"/><rect x="-3" y="-6" width="6" height="3" rx="1"/></g><text x="50" y="69" text-anchor="middle" font-family="Arial Black" font-size="12" fill="white" letter-spacing="1">CARRERAS</text><text x="50" y="80" text-anchor="middle" font-family="Arial Black" font-size="12" fill="white" letter-spacing="1">GARAGE</text></svg>
+    <div class="h-logo-t"><strong>CARRERAS GARAGE</strong><span>MECÁNICA AUTOMOTRIZ</span></div>
+  </div>
+  <div class="h-right">
+    <select id="mesSelect" class="h-mes" onchange="changeMes()"></select>
+    <div class="h-cfg" onclick="openConfig()">&#9881;&#65039;</div>
+  </div>
+</header>
+
+<div id="loadingBar"></div>
+
+<div id="alertBanner" onclick="goPage('alertas')">
+  <div class="ab-ico">&#128276;</div>
+  <div class="ab-text">
+    <strong id="abTitle">Services proximos a vencer</strong>
+    <span id="abSub">Toca para ver y avisar a los clientes</span>
+  </div>
+  <div class="ab-arr">&#8250;</div>
+</div>
+
+<div class="content">
+  <div id="page-resumen" class="page on">
+    <div class="balance-hero">
+      <div class="bh-label">Balance del mes</div>
+      <div class="bh-num" id="balNum">$0</div>
+      <div class="bh-sub" id="balSub">Cargando...</div>
+      <div class="bh-emoji" id="balEmoji">&#128528;</div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card" style="--c:#22c55e"><div class="sc-label">&#128176; Ingresos</div><div class="sc-val" id="sIng">$0</div></div>
+      <div class="stat-card" style="--c:#3b82f6"><div class="sc-label">&#128119; Empleados</div><div class="sc-val" id="sEmp">$0</div></div>
+      <div class="stat-card" style="--c:#f59e0b"><div class="sc-label">&#128297; Repuestos</div><div class="sc-val" id="sRep">$0</div></div>
+      <div class="stat-card" style="--c:#818cf8"><div class="sc-label">&#128230; Gastos</div><div class="sc-val" id="sGas">$0</div></div>
+    </div>
+    <div class="chart-card">
+      <div class="card-title">Distribucion egresos</div>
+      <div id="chartArea"></div>
+    </div>
+    <div class="moves-card">
+      <div class="card-title">Ultimos movimientos</div>
+      <div id="lastMoves"></div>
+    </div>
+  </div>
+
+  <div id="page-ingresos" class="page">
+    <div class="form-card">
+      <div class="fc-title">Nuevo Ingreso</div>
+      <div class="f-row"><label class="f-label">Descripcion / Trabajo</label><input class="f-inp" id="iDesc" placeholder="Ej: Service Ford Focus..."></div>
+      <div class="g2">
+        <div class="f-row"><label class="f-label">Monto ($)</label><input class="f-inp" type="number" id="iMonto" placeholder="0"></div>
+        <div class="f-row"><label class="f-label">Fecha</label><input class="f-inp" type="date" id="iFecha"></div>
+      </div>
+      <button class="btn-primary" id="btnIng" onclick="agregar('ingresos')">REGISTRAR INGRESO</button>
+    </div>
+    <div class="stitle">Historial</div>
+    <div class="entry-list" id="list-ingresos"></div>
+  </div>
+
+  <div id="page-empleados" class="page">
+    <div class="form-card">
+      <div class="fc-title">Pago a Empleado</div>
+      <div class="f-row"><label class="f-label">Nombre</label><input class="f-inp" id="eDesc" placeholder="Ej: Carlos..."></div>
+      <div class="g2">
+        <div class="f-row"><label class="f-label">Monto ($)</label><input class="f-inp" type="number" id="eMonto" placeholder="0"></div>
+        <div class="f-row"><label class="f-label">Fecha</label><input class="f-inp" type="date" id="eFecha"></div>
+      </div>
+      <div class="f-row"><label class="f-label">Concepto</label>
+        <select class="f-inp" id="eTipo"><option>Sueldo</option><option>Adelanto</option><option>Horas extra</option><option>Bono</option><option>Otro</option></select>
+      </div>
+      <button class="btn-primary" id="btnEmp" onclick="agregar('empleados')">REGISTRAR PAGO</button>
+    </div>
+    <div class="stitle">Historial</div>
+    <div class="entry-list" id="list-empleados"></div>
+  </div>
+
+  <div id="page-repuestos" class="page">
+    <div class="form-card">
+      <div class="fc-title">Compra de Repuesto</div>
+      <div class="f-row"><label class="f-label">Repuesto / Material</label><input class="f-inp" id="rDesc" placeholder="Ej: Filtro aceite..."></div>
+      <div class="g2">
+        <div class="f-row"><label class="f-label">Monto ($)</label><input class="f-inp" type="number" id="rMonto" placeholder="0"></div>
+        <div class="f-row"><label class="f-label">Fecha</label><input class="f-inp" type="date" id="rFecha"></div>
+      </div>
+      <div class="f-row"><label class="f-label">Proveedor (opcional)</label><input class="f-inp" id="rProv" placeholder="Ej: Autopartes Central..."></div>
+      <button class="btn-primary" id="btnRep" onclick="agregar('repuestos')">REGISTRAR REPUESTO</button>
+    </div>
+    <div class="stitle">Historial</div>
+    <div class="entry-list" id="list-repuestos"></div>
+  </div>
+
+  <div id="page-gastos" class="page">
+    <div class="form-card">
+      <div class="fc-title">Gasto Varios</div>
+      <div class="f-row"><label class="f-label">Descripcion</label><input class="f-inp" id="gDesc" placeholder="Ej: Luz, alquiler..."></div>
+      <div class="g2">
+        <div class="f-row"><label class="f-label">Monto ($)</label><input class="f-inp" type="number" id="gMonto" placeholder="0"></div>
+        <div class="f-row"><label class="f-label">Fecha</label><input class="f-inp" type="date" id="gFecha"></div>
+      </div>
+      <div class="f-row"><label class="f-label">Categoria</label>
+        <select class="f-inp" id="gTipo"><option>Servicios</option><option>Alquiler</option><option>Herramientas</option><option>Combustible</option><option>Impuestos</option><option>Limpieza</option><option>Otro</option></select>
+      </div>
+      <button class="btn-primary" id="btnGas" onclick="agregar('gastos')">REGISTRAR GASTO</button>
+    </div>
+    <div class="stitle">Historial</div>
+    <div class="entry-list" id="list-gastos"></div>
+  </div>
+
+  <div id="page-clientes" class="page">
+    <div class="form-card">
+      <div class="fc-title">Nuevo Cliente</div>
+      <div class="g2">
+        <div class="f-row"><label class="f-label">Nombre</label><input class="f-inp" id="cNombre" placeholder="Juan Garcia"></div>
+        <div class="f-row"><label class="f-label">Telefono</label><input class="f-inp" type="tel" id="cTel" placeholder="11-1234-5678"></div>
+      </div>
+      <button class="btn-primary" id="btnCliente" onclick="agregarCliente()">AGREGAR CLIENTE</button>
+    </div>
+    <div class="form-card">
+      <div class="fc-title">Registrar Service</div>
+      <div class="f-row"><label class="f-label">Cliente</label>
+        <select class="f-inp" id="sCliente"><option value="">Selecciona cliente</option></select>
+      </div>
+      <div class="f-row"><label class="f-label">Tipo de service</label>
+        <input class="f-inp" id="sDesc" placeholder="Ej: Service completo, cambio aceite...">
+      </div>
+      <div class="f-row"><label class="f-label">Vehiculo</label>
+        <input class="f-inp" id="sVeh" placeholder="Ej: Toyota Corolla 2020 - ABC 123">
+      </div>
+      <div class="g2">
+        <div class="f-row"><label class="f-label">Fecha service</label><input class="f-inp" type="date" id="sFecha"></div>
+        <div class="f-row"><label class="f-label">Monto ($)</label><input class="f-inp" type="number" id="sMonto" placeholder="0"></div>
+      </div>
+      <div class="f-row"><label class="f-label">Alertar en</label>
+        <select class="f-inp" id="sAlerta">
+          <option value="11">11 meses (recomendado)</option>
+          <option value="12">12 meses / 1 anio exacto</option>
+          <option value="6">6 meses</option>
+          <option value="3">3 meses</option>
+        </select>
+      </div>
+      <div class="f-row"><label class="f-label">Notas (opcional)</label>
+        <input class="f-inp" id="sNotas" placeholder="Ej: Proximo service cambiar correa">
+      </div>
+      <button class="btn-primary" id="btnService" onclick="agregarService()">REGISTRAR SERVICE</button>
+    </div>
+    <div class="stitle">Clientes</div>
+    <div id="clientesList"></div>
+  </div>
+
+  <div id="page-alertas" class="page">
+    <div class="stitle">Services proximos a vencer</div>
+    <div id="alertasList"></div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <div class="nav-item on" id="nav-resumen"   onclick="goPage('resumen')">  <div class="ni">&#128202;</div><div class="nl">Resumen</div></div>
+  <div class="nav-item"    id="nav-ingresos"  onclick="goPage('ingresos')"> <div class="ni">&#128176;</div><div class="nl">Ingresos</div></div>
+  <div class="nav-item"    id="nav-empleados" onclick="goPage('empleados')"><div class="ni">&#128119;</div><div class="nl">Empleados</div></div>
+  <div class="nav-item"    id="nav-repuestos" onclick="goPage('repuestos')"><div class="ni">&#128297;</div><div class="nl">Repuestos</div></div>
+  <div class="nav-item"    id="nav-gastos"    onclick="goPage('gastos')">   <div class="ni">&#128230;</div><div class="nl">Gastos</div></div>
+  <div class="nav-item"    id="nav-clientes"  onclick="goPage('clientes')"> <div class="ni">&#128100;</div><div class="nl">Clientes</div></div>
+  <div class="nav-item"    id="nav-alertas"   onclick="goPage('alertas')">  <div class="ni">&#128276;</div><div class="nl">Alertas</div></div>
+</nav>
+<div id="toast"></div>
+
+<script>
+const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const CATS={
+  ingresos: {icon:'&#128176;',color:'#22c55e',bg:'rgba(34,197,94,.12)'},
+  empleados:{icon:'&#128119;',color:'#3b82f6',bg:'rgba(59,130,246,.12)'},
+  repuestos:{icon:'&#128297;',color:'#f59e0b',bg:'rgba(245,158,11,.12)'},
+  gastos:   {icon:'&#128230;',color:'#818cf8',bg:'rgba(129,140,248,.12)'},
+};
+let SCRIPT_URL=localStorage.getItem('cg_script_url')||'';
+let mesActual='',cache={},clientes=[],alertas=[];
+
+(function init(){
+  const sel=document.getElementById('mesSelect');
+  const now=new Date();
+  mesActual=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  for(let i=0;i<13;i++){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const v=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const o=document.createElement('option');
+    o.value=v;o.textContent=`${MESES[d.getMonth()]} ${d.getFullYear()}`;
+    sel.appendChild(o);
+  }
+  const hoy=new Date().toISOString().split('T')[0];
+  ['iFecha','eFecha','rFecha','gFecha','sFecha'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=hoy;});
+  if(SCRIPT_URL){document.getElementById('cfgOverlay').classList.add('hidden');loadAll();}
+})();
+
+async function saveConfig(){
+  const url=document.getElementById('cfgUrl').value.trim();
+  if(!url.includes('script.google.com')){toast('URL invalida');return;}
+  const st=document.getElementById('cfgStatus');
+  st.textContent='Probando conexion...';
+  try{
+    const r=await api({action:'ping'},url);
+    if(r.ok){
+      SCRIPT_URL=url;localStorage.setItem('cg_script_url',url);
+      document.getElementById('cfgOverlay').classList.add('hidden');
+      toast('Conectado a Google Sheets!');loadAll();
+    } else {st.style.color='var(--red)';st.textContent='No se pudo conectar. Verifica la URL.';}
+  }catch(e){st.style.color='var(--red)';st.textContent='Error: '+e.message;}
+}
+function openConfig(){
+  document.getElementById('cfgUrl').value=SCRIPT_URL;
+  document.getElementById('cfgStatus').textContent='';
+  document.getElementById('cfgOverlay').classList.remove('hidden');
+}
+
+async function api(params,url){
+  const base=url||SCRIPT_URL;
+  if(params.action.startsWith('get')){
+    const qs=new URLSearchParams(params).toString();
+    const r=await fetch(`${base}?${qs}`);return r.json();
+  }
+  const r=await fetch(base,{method:'POST',body:JSON.stringify(params)});
+  return r.json();
+}
+
+function loading(show){
+  const bar=document.getElementById('loadingBar');
+  bar.style.width=show?'70%':'100%';
+  if(!show)setTimeout(()=>{bar.style.width='0';},300);
+}
+
+async function loadAll(){
+  loading(true);
+  await Promise.all([loadMovimientos(mesActual),loadClientes(),loadAlertas()]);
+  loading(false);
+}
+
+async function loadMovimientos(mes){
+  try{
+    const d=await api({action:'getMovimientos',mes});
+    cache[mes]=d;renderResumen(d);renderListas(d);
+  }catch(e){toast('Error cargando datos');renderResumen({});renderListas({});}
+}
+
+async function loadClientes(){
+  try{clientes=await api({action:'getClientes'});renderClientesList();populateClienteSelect();}
+  catch(e){clientes=[];}
+}
+
+async function loadAlertas(){
+  try{
+    const services=await api({action:'getServices'});
+    const hoy=new Date();hoy.setHours(0,0,0,0);
+    alertas=services.filter(s=>{
+      if(s.alerta_enviada===true||s.alerta_enviada==='TRUE')return false;
+      const fa=new Date(s.fecha_alerta+'T00:00:00');
+      return(fa-hoy)/86400000<=30;
+    }).map(s=>({...s,dias:Math.ceil((new Date(s.fecha_alerta+'T00:00:00')-hoy)/86400000)}));
+    renderAlertas();updateAlertBanner();
+  }catch(e){alertas=[];}
+}
+
+function changeMes(){
+  mesActual=document.getElementById('mesSelect').value;
+  if(cache[mesActual]){renderResumen(cache[mesActual]);renderListas(cache[mesActual]);}
+  else loadMovimientos(mesActual);
+}
+
+async function agregar(cat){
+  const IDS={
+    ingresos: {d:'iDesc',m:'iMonto',f:'iFecha',x:null,    btn:'btnIng',label:'REGISTRAR INGRESO'},
+    empleados:{d:'eDesc',m:'eMonto',f:'eFecha',x:'eTipo', btn:'btnEmp',label:'REGISTRAR PAGO'},
+    repuestos:{d:'rDesc',m:'rMonto',f:'rFecha',x:'rProv', btn:'btnRep',label:'REGISTRAR REPUESTO'},
+    gastos:   {d:'gDesc',m:'gMonto',f:'gFecha',x:'gTipo', btn:'btnGas',label:'REGISTRAR GASTO'},
+  };
+  const ids=IDS[cat];
+  const descripcion=document.getElementById(ids.d).value.trim();
+  const monto=parseFloat(document.getElementById(ids.m).value);
+  const fecha=document.getElementById(ids.f).value;
+  const extra=ids.x?document.getElementById(ids.x).value:'';
+  if(!descripcion){toast('Ingresa una descripcion');return;}
+  if(!monto||monto<=0){toast('Monto invalido');return;}
+  if(!fecha){toast('Selecciona una fecha');return;}
+  const btn=document.getElementById(ids.btn);
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span>GUARDANDO...';
+  try{
+    const res=await api({action:'addMovimiento',cat,descripcion,monto,fecha,extra,mes:mesActual});
+    if(!res.ok)throw new Error(res.error||'Error');
+    if(!cache[mesActual])cache[mesActual]={ingresos:[],empleados:[],repuestos:[],gastos:[]};
+    cache[mesActual][cat].unshift({id:res.id,cat,descripcion,monto,fecha,extra});
+    renderResumen(cache[mesActual]);renderListas(cache[mesActual]);
+    document.getElementById(ids.d).value='';document.getElementById(ids.m).value='';
+    if(cat==='repuestos')document.getElementById('rProv').value='';
+    toast('Guardado en Google Sheets');
+  }catch(e){toast('Error: '+e.message);}
+  btn.disabled=false;btn.textContent=ids.label;
+}
+
+async function eliminarMov(cat,id){
+  if(!confirm('Eliminar este registro?'))return;
+  try{
+    await api({action:'delMovimiento',id});
+    cache[mesActual][cat]=cache[mesActual][cat].filter(e=>e.id!==id);
+    renderResumen(cache[mesActual]);renderListas(cache[mesActual]);toast('Eliminado');
+  }catch(e){toast('Error al eliminar');}
+}
+
+async function agregarCliente(){
+  const nombre=document.getElementById('cNombre').value.trim();
+  const telefono=document.getElementById('cTel').value.trim();
+  if(!nombre){toast('Ingresa un nombre');return;}
+  const btn=document.getElementById('btnCliente');btn.disabled=true;
+  try{
+    const res=await api({action:'addCliente',nombre,telefono});
+    clientes.unshift({id:res.id,nombre,telefono});
+    renderClientesList();populateClienteSelect();
+    document.getElementById('cNombre').value='';document.getElementById('cTel').value='';
+    toast('Cliente agregado');
+  }catch(e){toast('Error: '+e.message);}
+  btn.disabled=false;
+}
+
+async function eliminarCliente(id){
+  if(!confirm('Eliminar cliente y todos sus services?'))return;
+  try{
+    await api({action:'delCliente',id});
+    clientes=clientes.filter(c=>c.id!==id);
+    renderClientesList();populateClienteSelect();await loadAlertas();toast('Cliente eliminado');
+  }catch(e){toast('Error al eliminar');}
+}
+
+async function agregarService(){
+  const cliente_id=document.getElementById('sCliente').value;
+  const descripcion=document.getElementById('sDesc').value.trim();
+  const vehiculo=document.getElementById('sVeh').value.trim();
+  const fecha_str=document.getElementById('sFecha').value;
+  const monto=parseFloat(document.getElementById('sMonto').value)||0;
+  const mesesAlerta=parseInt(document.getElementById('sAlerta').value);
+  const notas=document.getElementById('sNotas').value.trim();
+  if(!cliente_id){toast('Selecciona un cliente');return;}
+  if(!descripcion){toast('Ingresa la descripcion');return;}
+  if(!fecha_str){toast('Ingresa la fecha');return;}
+  const cliente_nombre=clientes.find(c=>c.id==cliente_id)?.nombre||'';
+  const fa=new Date(fecha_str+'T00:00:00');
+  fa.setMonth(fa.getMonth()+mesesAlerta);
+  const fecha_alerta=fa.toISOString().split('T')[0];
+  const btn=document.getElementById('btnService');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span>GUARDANDO...';
+  try{
+    await api({action:'addService',cliente_id,cliente_nombre,descripcion,vehiculo,fecha_service:fecha_str,fecha_alerta,monto,notas});
+    ['sDesc','sVeh','sNotas'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('sMonto').value='';document.getElementById('sCliente').value='';
+    await loadAlertas();toast(`Service registrado - alerta en ${mesesAlerta} meses`);
+  }catch(e){toast('Error: '+e.message);}
+  btn.disabled=false;btn.textContent='REGISTRAR SERVICE';
+}
+
+async function marcarAlertaEnviada(id){
+  try{
+    await api({action:'marcarAlerta',id});
+    alertas=alertas.filter(a=>a.id!==id);
+    renderAlertas();updateAlertBanner();toast('Marcado como contactado');
+  }catch(e){toast('Error');}
+}
+
+const fmt=n=>'$'+Math.round(n||0).toLocaleString('es-AR');
+const fmtF=s=>{if(!s)return'';const d=new Date(s+'T00:00:00');return d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});};
+
+function renderResumen(d){
+  const sum=cat=>(d[cat]||[]).reduce((s,e)=>s+parseFloat(e.monto||0),0);
+  const ing=sum('ingresos'),emp=sum('empleados'),rep=sum('repuestos'),gas=sum('gastos');
+  const egr=emp+rep+gas,bal=ing-egr;
+  document.getElementById('sIng').textContent=fmt(ing);
+  document.getElementById('sEmp').textContent=fmt(emp);
+  document.getElementById('sRep').textContent=fmt(rep);
+  document.getElementById('sGas').textContent=fmt(gas);
+  const nb=document.getElementById('balNum');
+  nb.textContent=fmt(bal);nb.style.color=bal>0?'var(--green)':bal<0?'var(--red)':'var(--blue2)';
+  document.getElementById('balEmoji').textContent=bal>0?'&#129297;':bal<0?'&#128556;':'&#128528;';
+  document.getElementById('balSub').textContent='Egresos: '+fmt(egr);
+  const maxE=Math.max(emp,rep,gas,1);
+  document.getElementById('chartArea').innerHTML=[
+    ['Empleados',emp,'#3b82f6'],['Repuestos',rep,'#f59e0b'],['Gastos',gas,'#818cf8'],
+  ].map(([l,v,c])=>`<div class="ch-row"><div class="ch-lbl">${l}</div><div class="ch-track"><div class="ch-fill" style="width:${(v/maxE*100).toFixed(1)}%;background:${c}"></div></div><div class="ch-val">${fmt(v)}</div></div>`).join('');
+  const todos=[
+    ...(d.ingresos||[]).map(e=>({...e,cat:'ingresos'})),
+    ...(d.empleados||[]).map(e=>({...e,cat:'empleados'})),
+    ...(d.repuestos||[]).map(e=>({...e,cat:'repuestos'})),
+    ...(d.gastos||[]).map(e=>({...e,cat:'gastos'})),
+  ].sort((a,b)=>b.id-a.id).slice(0,6);
+  document.getElementById('lastMoves').innerHTML=todos.length
+    ?todos.map(e=>entryHTML(e,e.cat,false)).join('')
+    :'<div class="empty"><div class="empty-ico">&#128217;</div><p>Sin movimientos este mes</p></div>';
+}
+
+function renderListas(d){
+  ['ingresos','empleados','repuestos','gastos'].forEach(cat=>{
+    const items=(d[cat]||[]);
+    document.getElementById('list-'+cat).innerHTML=items.length
+      ?items.map(e=>entryHTML(e,cat,true)).join('')
+      :`<div class="empty"><div class="empty-ico">${CATS[cat].icon}</div><p>Sin registros este mes</p></div>`;
+  });
+}
+
+function entryHTML(e,cat,showDel){
+  const c=CATS[cat];
+  return `<div class="entry">
+    <div class="e-ico" style="background:${c.bg}">${c.icon}</div>
+    <div class="e-body">
+      <div class="e-desc">${e.descripcion}</div>
+      <div class="e-meta">${fmtF(e.fecha)}${e.extra?' &middot; '+e.extra:''}</div>
+    </div>
+    <div class="e-amt" style="color:${c.color}">${fmt(e.monto)}</div>
+    ${showDel?`<button class="e-del" onclick="eliminarMov('${cat}',${e.id})">&#10005;</button>`:''}
+  </div>`;
+}
+
+function populateClienteSelect(){
+  document.getElementById('sCliente').innerHTML='<option value="">Selecciona cliente</option>'+
+    clientes.map(c=>`<option value="${c.id}">${c.nombre}${c.telefono?' - '+c.telefono:''}</option>`).join('');
+}
+
+function renderClientesList(){
+  const el=document.getElementById('clientesList');
+  if(!clientes.length){el.innerHTML='<div class="empty"><div class="empty-ico">&#128100;</div><p>Sin clientes registrados</p></div>';return;}
+  el.innerHTML=clientes.map(c=>`<div class="client-card"><div class="cc-head"><div class="cc-avatar">&#128100;</div><div><div class="cc-name">${c.nombre}</div><div class="cc-phone">${c.telefono||'Sin telefono'}</div></div><button class="cc-del" onclick="eliminarCliente(${c.id})">&#10005;</button></div></div>`).join('');
+}
+
+function renderAlertas(){
+  const el=document.getElementById('alertasList');
+  if(!alertas.length){el.innerHTML='<div class="empty"><div class="empty-ico">&#127881;</div><p>Todo al dia - sin alertas pendientes</p></div>';return;}
+  el.innerHTML=alertas.map(a=>{
+    const dias=a.dias;
+    const color=dias<=0?'var(--red)':dias<=7?'var(--amber)':'var(--blue2)';
+    const bgBadge=dias<=0?'rgba(240,82,82,.18)':dias<=7?'rgba(245,158,11,.18)':'rgba(32,128,208,.18)';
+    const badge=dias<=0?'VENCIDA':`en ${dias}d`;
+    const tel=(a.telefono||'').replace(/\D/g,'');
+    const msg=encodeURIComponent(`Hola ${a.cliente_nombre}! Te contactamos desde Carreras Garage.\n\nTu ${a.vehiculo||'vehiculo'} esta proximo al service de "${a.descripcion}".\n\nCuando te viene bien pasar? Te esperamos!`);
+    const waUrl=tel?`https://wa.me/54${tel}?text=${msg}`:null;
+    return `<div class="alert-card">
+      <div class="ac-head"><div class="ac-ico">&#128276;</div><div><div class="ac-name">${a.cliente_nombre}</div><div class="ac-veh">${a.vehiculo||'Vehiculo no especificado'}</div></div><div class="ac-badge" style="color:${color};background:${bgBadge}">${badge}</div></div>
+      <div class="ac-detail"><strong>${a.descripcion}</strong><br>Ultimo service: ${fmtF(a.fecha_service)} &middot; Alerta: ${fmtF(a.fecha_alerta)}${a.notas?'<br>&#128221; '+a.notas:''}</div>
+      <div class="ac-actions">
+        ${waUrl?`<button class="ac-btn wa" onclick="window.open('${waUrl}','_blank')">&#128241; WhatsApp</button>`:`<button class="ac-btn wa" disabled style="opacity:.4">Sin tel.</button>`}
+        <button class="ac-btn done" onclick="marcarAlertaEnviada(${a.id})">&#10003; Contactado</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateAlertBanner(){
+  const banner=document.getElementById('alertBanner');
+  const navAlertas=document.getElementById('nav-alertas');
+  const oldBadge=navAlertas.querySelector('.nav-badge');
+  if(alertas.length>0){
+    banner.classList.add('show');
+    document.getElementById('abTitle').textContent=alertas.length===1?'1 service proximo a vencer':`${alertas.length} services proximos a vencer`;
+    if(!oldBadge){const b=document.createElement('div');b.className='nav-badge';b.textContent=alertas.length>9?'9+':alertas.length;navAlertas.appendChild(b);}
+    else oldBadge.textContent=alertas.length>9?'9+':alertas.length;
+  }else{banner.classList.remove('show');if(oldBadge)oldBadge.remove();}
+}
+
+function goPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('on'));
+  document.getElementById('page-'+name).classList.add('on');
+  document.getElementById('nav-'+name).classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toast(msg,dur=2800){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+</script>
+</body>
+</html>
