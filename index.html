@@ -304,6 +304,46 @@ header{position:sticky;top:0;z-index:100;padding:calc(var(--safe-top) + 10px) 16
     <div id="clientesList"></div>
   </div>
 
+  <!-- CUENTAS CORRIENTES -->
+  <div id="page-cuentas" class="page">
+    <div class="form-card">
+      <div class="fc-title">💳 Nuevo Trabajo / Deuda</div>
+      <div class="f-row"><label class="f-label">Cliente</label>
+        <select class="f-inp" id="tCliente"><option value="">— Seleccioná cliente —</option></select>
+      </div>
+      <div class="f-row"><label class="f-label">Descripción del trabajo</label>
+        <input class="f-inp" id="tDesc" placeholder="Ej: Reparación motor, chapa y pintura...">
+      </div>
+      <div class="g2">
+        <div class="f-row"><label class="f-label">Total ($)</label><input class="f-inp" type="number" id="tTotal" placeholder="0"></div>
+        <div class="f-row"><label class="f-label">Fecha</label><input class="f-inp" type="date" id="tFecha"></div>
+      </div>
+      <div class="f-row"><label class="f-label">Notas (opcional)</label>
+        <input class="f-inp" id="tNotas" placeholder="Ej: Paga en cuotas, espera cobrar...">
+      </div>
+      <button class="btn-primary" id="btnTrabajo" onclick="agregarTrabajo()">REGISTRAR TRABAJO</button>
+    </div>
+    <div class="stitle">Cuentas por cobrar</div>
+    <div id="cuentasList"></div>
+  </div>
+
+  <!-- MODAL PAGO PARCIAL -->
+  <div id="pagoModal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);align-items:flex-end;justify-content:center;padding-bottom:calc(var(--tab-h) + var(--safe-bot));">
+    <div style="background:var(--s1);border:1px solid var(--border2);border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:500px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--blue2);letter-spacing:2px;margin-bottom:4px;">REGISTRAR PAGO</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:16px;" id="pagoModalSub">Saldo pendiente: $0</div>
+      <div class="g2" style="margin-bottom:10px;">
+        <div><label class="f-label">Monto ($)</label><input class="f-inp" type="number" id="pagoMonto" placeholder="0"></div>
+        <div><label class="f-label">Fecha</label><input class="f-inp" type="date" id="pagoFecha"></div>
+      </div>
+      <div style="margin-bottom:14px;"><label class="f-label">Notas (opcional)</label><input class="f-inp" id="pagoNotas" placeholder="Ej: Efectivo, transferencia..."></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="closePagoModal()" style="flex:1;padding:12px;border:1px solid var(--border2);border-radius:10px;background:transparent;color:var(--text2);font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;cursor:pointer;">CANCELAR</button>
+        <button id="btnPago" onclick="confirmarPago()" style="flex:2;padding:12px;border:none;border-radius:10px;background:var(--green);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;cursor:pointer;">✓ CONFIRMAR PAGO</button>
+      </div>
+    </div>
+  </div>
+
   <div id="page-alertas" class="page">
     <div class="stitle">Services proximos a vencer</div>
     <div id="alertasList"></div>
