@@ -534,7 +534,7 @@ header{position:sticky;top:0;z-index:90;padding:calc(var(--safe-top) + 10px) 16p
 //  CARRERAS GARAGE v3.0
 // ════════════════════════════════════════
 const USUARIOS    = { 'eze': 'robieroten' };
-const SCRIPT_URL  = 'https://script.google.com/macros/s/AKfycbzaQ3QYjIztlVkfHPFqCziWStFIAgkEW_qcuGzAGQE69AGttgMIiWto8XokGcZz6kF2/exec';
+const SCRIPT_URL  = 'https://script.google.com/macros/s/AKfycbyivm3xw8GTXBe9bI_zBK3sZ6OCBk7_keUAyUoFit7vgYk4SDVt6Slsg7nEZBtC2KAU/exec';
 const MESES       = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const CATS        = {
   ingresos:  { icon:'💰', color:'#22c55e', bg:'rgba(34,197,94,.12)'   },
@@ -923,21 +923,23 @@ const fmtF = s=>{if(!s)return'';const d=new Date(s+'T00:00:00');return d.toLocal
 
 function renderResumen(d) {
   const sum = cat=>(d[cat]||[]).reduce((s,e)=>s+parseFloat(e.monto||0),0);
-  const ing=sum('ingresos'), emp=sum('empleados'), rep=sum('repuestos'), gas=sum('gastos');
+  // ingresos = pagos de ordenes (v3) + ingresos legacy de Movimientos (v2)
+  const ing = sum("ingresos") + sum("ingresos_legacy");
+  const emp=sum("empleados"), rep=sum("repuestos"), gas=sum("gastos");
   const egr=emp+rep+gas, bal=ing-egr;
 
   // Por cobrar: ordenes terminadas/en proceso con saldo
-  const porCobrar = ordenes.filter(o=>o.saldo>0.01&&o.estado!=='Pendiente').reduce((s,o)=>s+o.saldo,0);
+  const porCobrar = ordenes.filter(o=>o.saldo>0.01&&o.estado!=="Pendiente").reduce((s,o)=>s+o.saldo,0);
 
-  document.getElementById('sIng').textContent      = fmt(ing);
-  document.getElementById('sPorCobrar').textContent = fmt(porCobrar);
-  document.getElementById('sEgr').textContent       = fmt(egr);
-  document.getElementById('sEmp').textContent       = fmt(emp);
+  document.getElementById("sIng").textContent      = fmt(ing);
+  document.getElementById("sPorCobrar").textContent = fmt(porCobrar);
+  document.getElementById("sEgr").textContent       = fmt(egr);
+  document.getElementById("sEmp").textContent       = fmt(emp);
 
-  const nb=document.getElementById('balNum');
-  nb.textContent=fmt(bal); nb.style.color=bal>0?'var(--green)':bal<0?'var(--red)':'var(--blue2)';
-  document.getElementById('balEmoji').textContent=bal>0?'🤑':bal<0?'😬':'😐';
-  document.getElementById('balSub').textContent='Egresos: '+fmt(egr);
+  const nb=document.getElementById("balNum");
+  nb.textContent=fmt(bal); nb.style.color=bal>0?"var(--green)":bal<0?"var(--red)":"var(--blue2)";
+  document.getElementById("balEmoji").textContent=bal>0?"🤑":bal<0?"😬":"😐";
+  document.getElementById("balSub").textContent="Egresos: "+fmt(egr);
 
   const maxE=Math.max(emp,rep,gas,1);
   document.getElementById('chartArea').innerHTML=[
