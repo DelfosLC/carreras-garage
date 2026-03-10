@@ -255,14 +255,10 @@ header{position:sticky;top:0;z-index:90;padding:calc(var(--safe-top) + 10px) 16p
 <div id="cfgOverlay" class="hidden">
   <div class="cfg-box">
     <h2>⚙️ Configuración</h2>
-    <p>Podés actualizar la URL del Apps Script si hiciste una nueva implementación.</p>
-    <div class="cfg-field">
-      <label>URL del Apps Script</label>
-      <input id="cfgUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" readonly>
-    </div>
+    <p>Carreras Garage v3.0.1</p>
     <button class="btn-primary" onclick="document.getElementById('cfgOverlay').classList.add('hidden')" style="margin-bottom:8px;">✕ CERRAR</button>
     <button class="btn-secondary" onclick="cerrarSesion()" style="color:var(--red);border-color:rgba(240,82,82,.35);">🔒 CERRAR SESION</button>
-    <div class="cfg-ver"><span>Versión</span><span>v3.0.0 — Mar 2026</span></div>
+    <div class="cfg-ver"><span>Versión</span><span>v3.0.1 — Mar 2026</span></div>
     <div class="cfg-status" id="cfgStatus"></div>
   </div>
 </div>
@@ -538,7 +534,7 @@ header{position:sticky;top:0;z-index:90;padding:calc(var(--safe-top) + 10px) 16p
 //  CARRERAS GARAGE v3.0
 // ════════════════════════════════════════
 const USUARIOS    = { 'eze': 'robieroten' };
-const SCRIPT_URL  = 'https://script.google.com/macros/s/AKfycbyGhLsh2uEvBhWmKW93YDbl2SgW-xBkGRbarEPHzQX5EzvUp24LrizUDZgn5cWweyrt/exec';
+const SCRIPT_URL  = 'https://script.google.com/macros/s/AKfycbzaQ3QYjIztlVkfHPFqCziWStFIAgkEW_qcuGzAGQE69AGttgMIiWto8XokGcZz6kF2/exec';
 const MESES       = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const CATS        = {
   ingresos:  { icon:'💰', color:'#22c55e', bg:'rgba(34,197,94,.12)'   },
@@ -631,7 +627,6 @@ function initApp() {
 }
 
 function openConfig() {
-  document.getElementById('cfgUrl').value = SCRIPT_URL;
   document.getElementById('cfgOverlay').classList.remove('hidden');
 }
 
