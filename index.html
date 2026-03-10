@@ -176,6 +176,7 @@ header{position:sticky;top:0;z-index:100;padding:calc(var(--safe-top) + 10px) 16
     </div>
     <button class="cfg-save" onclick="saveConfig()">CONECTAR Y PROBAR &rarr;</button>
     <button onclick="document.getElementById('cfgOverlay').classList.add('hidden')" style="width:100%;padding:11px;border:1px solid rgba(32,128,208,.35);border-radius:10px;background:transparent;color:#7a9bbf;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:8px;">✕ CERRAR</button>
+    <button onclick="cerrarSesion()" style="width:100%;padding:11px;border:1px solid rgba(240,82,82,.35);border-radius:10px;background:transparent;color:#f05252;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:8px;">🔒 CERRAR SESION</button>
     <div class="cfg-status" id="cfgStatus"></div>
     <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(32,128,208,.15);display:flex;align-items:center;justify-content:space-between;">
       <span style="font-size:10px;color:#3d5a7a;text-transform:uppercase;letter-spacing:2px;">Versión</span>
@@ -469,13 +470,44 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !document.getElementById('loginScreen').classList.contains('hidden')) doLogin();
 });
 
+// ── AUTO LOGOUT por inactividad ─────────
+const INACTIVIDAD_MS = 5 * 60 * 1000; // 5 minutos
+let timerInactividad = null;
+
+function resetTimer() {
+  clearTimeout(timerInactividad);
+  timerInactividad = setTimeout(() => {
+    sessionStorage.removeItem('cg_auth');
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginUser').value = '';
+    toast('Sesion cerrada por inactividad');
+  }, INACTIVIDAD_MS);
+}
+
+function activarWatchdog() {
+  ['click','touchstart','keydown','scroll'].forEach(ev =>
+    document.addEventListener(ev, resetTimer, { passive: true })
+  );
+  resetTimer();
+}
+
+function cerrarSesion() {
+  clearTimeout(timerInactividad);
+  sessionStorage.removeItem('cg_auth');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('cfgOverlay').classList.add('hidden');
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginUser').value = '';
+}
+
 // ── INIT ────────────────────────────────
 (function init() {
   if (sessionStorage.getItem('cg_auth') === '1') {
     document.getElementById('loginScreen').classList.add('hidden');
     initApp();
+    activarWatchdog();
   }
-  // Enter key en login ya manejado arriba
 })();
 
 function initApp() {
@@ -497,6 +529,7 @@ function initApp() {
     const el = document.getElementById(id); if (el) el.value = hoy;
   });
   loadAll();
+  activarWatchdog();
 }
 
 // ── CONFIG ──────────────────────────────
