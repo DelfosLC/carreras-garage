@@ -255,15 +255,33 @@ header{position:sticky;top:0;z-index:90;padding:calc(var(--safe-top) + 10px) 16p
 <div id="cfgOverlay" class="hidden">
   <div class="cfg-box">
     <h2>⚙️ Configuración</h2>
-    <p>Carreras Garage v3.0.1</p>
+    <p>Carreras Garage v3.1.0</p>
     <button class="btn-primary" onclick="document.getElementById('cfgOverlay').classList.add('hidden')" style="margin-bottom:8px;">✕ CERRAR</button>
     <button class="btn-secondary" onclick="cerrarSesion()" style="color:var(--red);border-color:rgba(240,82,82,.35);">🔒 CERRAR SESION</button>
-    <div class="cfg-ver"><span>Versión</span><span>v3.0.1 — Mar 2026</span></div>
+    <div class="cfg-ver"><span>Versión</span><span>v3.1.0 — Mar 2026</span></div>
     <div class="cfg-status" id="cfgStatus"></div>
   </div>
 </div>
 
 <!-- PAGO MODAL -->
+<!-- EDIT ORDEN MODAL -->
+<div id="editModal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);align-items:flex-end;justify-content:center;">
+  <div class="pago-modal-inner" style="max-height:85vh;overflow-y:auto;">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--blue2);letter-spacing:2px;margin-bottom:16px;">✏️ EDITAR ORDEN</div>
+    <div class="f-row"><label class="f-label">Descripcion</label><input class="f-inp" id="editDesc" placeholder="Descripcion del trabajo"></div>
+    <div class="g2">
+      <div class="f-row"><label class="f-label">Monto ($)</label><input class="f-inp" type="number" id="editMonto" placeholder="0"></div>
+      <div class="f-row"><label class="f-label">Kilometraje</label><input class="f-inp" type="number" id="editKm" placeholder="0"></div>
+    </div>
+    <div class="f-row"><label class="f-label">Vehiculo</label><input class="f-inp" id="editVehiculo" placeholder="Marca modelo año"></div>
+    <div class="f-row"><label class="f-label">Notas</label><input class="f-inp" id="editNotas" placeholder="Observaciones, repuestos adicionales..."></div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button onclick="closeEditModal()" class="btn-secondary" style="flex:1;">CANCELAR</button>
+      <button id="btnEdit" onclick="confirmarEdicion()" style="flex:2;padding:12px;border:none;border-radius:10px;background:var(--blue);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;cursor:pointer;">✓ GUARDAR CAMBIOS</button>
+    </div>
+  </div>
+</div>
+
 <div id="pagoModal">
   <div class="pago-modal-inner">
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--blue2);letter-spacing:2px;margin-bottom:4px;">REGISTRAR PAGO</div>
@@ -336,6 +354,7 @@ header{position:sticky;top:0;z-index:90;padding:calc(var(--safe-top) + 10px) 16p
           <div class="stat-card" style="--c:#f59e0b"><div class="sc-label">⏳ Por cobrar</div><div class="sc-val" id="sPorCobrar">$0</div></div>
           <div class="stat-card" style="--c:#f05252"><div class="sc-label">📤 Egresos</div><div class="sc-val" id="sEgr">$0</div></div>
           <div class="stat-card" style="--c:#3b82f6"><div class="sc-label">👷 Empleados</div><div class="sc-val" id="sEmp">$0</div></div>
+          <div class="stat-card" style="--c:#818cf8;grid-column:1/-1" onclick="goPage('ordenes')" cursor="pointer"><div class="sc-label">🚗 Ordenes activas este mes</div><div style="display:flex;align-items:baseline;gap:12px;"><div class="sc-val" id="sOrdenes">0</div><div style="font-size:12px;color:var(--text2);margin-bottom:2px;" id="sOrdenesDetalle"></div></div></div>
         </div>
         <div class="chart-card">
           <div class="card-title">Distribucion egresos</div>
@@ -381,6 +400,16 @@ header{position:sticky;top:0;z-index:90;padding:calc(var(--safe-top) + 10px) 16p
             <input class="f-inp" id="oNotas" placeholder="Observaciones...">
           </div>
           <button class="btn-primary" id="btnOrden" onclick="agregarOrden()">CREAR ORDEN</button>
+        </div>
+        <div class="form-card" style="margin-bottom:10px;">
+          <div class="fc-title">⚡ Ingreso Rapido</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">Para trabajos rapidos sin orden: foquito, scanner, liquidos, etc.</div>
+          <div class="f-row"><label class="f-label">Descripcion</label><input class="f-inp" id="qDesc" placeholder="Ej: Cambio foquito, Diagnostico scanner..."></div>
+          <div class="g2">
+            <div class="f-row"><label class="f-label">Monto ($)</label><input class="f-inp" type="number" id="qMonto" placeholder="0"></div>
+            <div class="f-row"><label class="f-label">Fecha</label><input class="f-inp" type="date" id="qFecha"></div>
+          </div>
+          <button class="btn-primary" id="btnQuick" onclick="ingresosRapido()" style="background:var(--green);">+ REGISTRAR COBRO</button>
         </div>
         <div class="f-row"><input class="f-inp" id="oBuscar" placeholder="🔍 Buscar por cliente, vehiculo o trabajo..." oninput="buscarOrdenes()"></div>
         <div class="filter-tabs" id="ordenFiltros">
@@ -931,10 +960,19 @@ function renderResumen(d) {
   // Por cobrar: ordenes terminadas/en proceso con saldo
   const porCobrar = ordenes.filter(o=>o.saldo>0.01&&o.estado!=="Pendiente").reduce((s,o)=>s+o.saldo,0);
 
+  // Ordenes activas del mes (no canceladas, con fecha en el mes actual)
+  const ordenesActivas = ordenes.filter(o => {
+    const oMes = (o.fecha||'').substring(0,7);
+    return oMes === mesActual && o.estado !== 'Cobrado';
+  });
+  const ordenesTotal = ordenes.filter(o => (o.fecha||'').substring(0,7) === mesActual);
+
   document.getElementById("sIng").textContent      = fmt(ing);
   document.getElementById("sPorCobrar").textContent = fmt(porCobrar);
   document.getElementById("sEgr").textContent       = fmt(egr);
   document.getElementById("sEmp").textContent       = fmt(emp);
+  document.getElementById("sOrdenes").textContent   = ordenesActivas.length;
+  document.getElementById("sOrdenesDetalle").textContent = ordenesTotal.length > 0 ? ordenesActivas.length + ' activas · ' + ordenesTotal.length + ' totales' : '';
 
   const nb=document.getElementById("balNum");
   nb.textContent=fmt(bal); nb.style.color=bal>0?"var(--green)":bal<0?"var(--red)":"var(--blue2)";
@@ -992,6 +1030,68 @@ function entryHTML(e, cat, showDel) {
   </div>`;
 }
 
+// ── EDITAR ORDEN ─────────────────────────
+let editActivoId = null;
+
+function openEditModal(id) {
+  const o = ordenes.find(o => o.id === id);
+  if (!o) return;
+  editActivoId = id;
+  document.getElementById('editDesc').value    = o.descripcion || '';
+  document.getElementById('editMonto').value   = o.monto || '';
+  document.getElementById('editKm').value      = o.km || '';
+  document.getElementById('editVehiculo').value= o.vehiculo || '';
+  document.getElementById('editNotas').value   = o.notas || '';
+  document.getElementById('editModal').style.display = 'flex';
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').style.display = 'none';
+  editActivoId = null;
+}
+
+async function confirmarEdicion() {
+  const descripcion = document.getElementById('editDesc').value.trim();
+  const monto       = parseFloat(document.getElementById('editMonto').value) || 0;
+  const km          = document.getElementById('editKm').value.trim();
+  const vehiculo    = document.getElementById('editVehiculo').value.trim();
+  const notas       = document.getElementById('editNotas').value.trim();
+  if (!descripcion) { toast('Ingresa una descripcion'); return; }
+  const btn = document.getElementById('btnEdit');
+  btn.disabled = true; btn.textContent = 'GUARDANDO...';
+  try {
+    await api({ action:'updateOrden', id:editActivoId, descripcion, monto, km, vehiculo, notas });
+    closeEditModal();
+    await loadOrdenes(document.getElementById('oBuscar').value, ordenFiltroActivo);
+    await loadMovimientos(mesActual);
+    toast('Orden actualizada');
+  } catch(e) { toast('Error: '+e.message); }
+  btn.disabled = false; btn.textContent = '✓ GUARDAR CAMBIOS';
+}
+
+// ── INGRESO RAPIDO ────────────────────────
+async function ingresosRapido() {
+  const descripcion = document.getElementById('qDesc').value.trim();
+  const monto       = parseFloat(document.getElementById('qMonto').value);
+  const fecha       = document.getElementById('qFecha').value;
+  if (!descripcion) { toast('Ingresa una descripcion'); return; }
+  if (!monto || monto <= 0) { toast('Monto invalido'); return; }
+  if (!fecha) { toast('Selecciona una fecha'); return; }
+  const btn = document.getElementById('btnQuick');
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>GUARDANDO...';
+  try {
+    const mes = fecha.substring(0, 7);
+    await api({ action:'addMovimiento', cat:'ingresos', descripcion, monto, fecha, extra:'Cobro rapido', mes });
+    document.getElementById('qDesc').value = '';
+    document.getElementById('qMonto').value = '';
+    // Refrescar cache de ese mes
+    delete cache[mes];
+    if (mes === mesActual) await loadMovimientos(mesActual);
+    toast('Cobro registrado 💰');
+  } catch(e) { toast('Error: '+e.message); }
+  btn.disabled = false; btn.textContent = '+ REGISTRAR COBRO';
+}
+
 function renderOrdenes() {
   const el=document.getElementById('ordenesList');
   if(!ordenes.length){el.innerHTML='<div class="empty"><div class="empty-ico">🔧</div><p>Sin ordenes</p></div>';return;}
@@ -1011,6 +1111,7 @@ function renderOrdenes() {
           <div class="oc-veh">${o.vehiculo||'Sin vehiculo'}${o.km?' · '+Number(o.km).toLocaleString('es-AR')+' km':''}</div>
         </div>
         <div class="oc-monto" style="color:${o.saldo>0.01?'var(--amber)':'var(--green)'};">${fmt(o.monto)}</div>
+        <button class="e-del" style="color:var(--blue2);font-size:13px;padding:4px 6px;" onclick="openEditModal(${o.id})">✏️</button>
         <button class="e-del" onclick="eliminarOrden(${o.id})">✕</button>
       </div>
       <div class="oc-desc">${o.descripcion}</div>
