@@ -255,10 +255,10 @@ header{position:sticky;top:0;z-index:90;padding:calc(var(--safe-top) + 10px) 16p
 <div id="cfgOverlay" class="hidden">
   <div class="cfg-box">
     <h2>⚙️ Configuración</h2>
-    <p>Carreras Garage v3.1.0</p>
+    <p>Carreras Garage v3.2.0</p>
     <button class="btn-primary" onclick="document.getElementById('cfgOverlay').classList.add('hidden')" style="margin-bottom:8px;">✕ CERRAR</button>
     <button class="btn-secondary" onclick="cerrarSesion()" style="color:var(--red);border-color:rgba(240,82,82,.35);">🔒 CERRAR SESION</button>
-    <div class="cfg-ver"><span>Versión</span><span>v3.1.0 — Mar 2026</span></div>
+    <div class="cfg-ver"><span>Versión</span><span>v3.2.0 — Mar 2026</span></div>
     <div class="cfg-status" id="cfgStatus"></div>
   </div>
 </div>
@@ -270,10 +270,17 @@ header{position:sticky;top:0;z-index:90;padding:calc(var(--safe-top) + 10px) 16p
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--blue2);letter-spacing:2px;margin-bottom:16px;">✏️ EDITAR ORDEN</div>
     <div class="f-row"><label class="f-label">Descripcion</label><input class="f-inp" id="editDesc" placeholder="Descripcion del trabajo"></div>
     <div class="g2">
-      <div class="f-row"><label class="f-label">Monto ($)</label><input class="f-inp" type="number" id="editMonto" placeholder="0"></div>
-      <div class="f-row"><label class="f-label">Kilometraje</label><input class="f-inp" type="number" id="editKm" placeholder="0"></div>
+      <div class="f-row"><label class="f-label">🔩 Repuestos ($)</label><input class="f-inp" type="number" id="editRepuestos" placeholder="0" oninput="calcEditTotal()"></div>
+      <div class="f-row"><label class="f-label">🔧 Mano de obra ($)</label><input class="f-inp" type="number" id="editManoObra" placeholder="0" oninput="calcEditTotal()"></div>
     </div>
-    <div class="f-row"><label class="f-label">Vehiculo</label><input class="f-inp" id="editVehiculo" placeholder="Marca modelo año"></div>
+    <div style="background:var(--s2);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;">Total</span>
+      <span id="editTotalDisplay" style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:var(--green);">$0</span>
+    </div>
+    <div class="g2">
+      <div class="f-row"><label class="f-label">Kilometraje</label><input class="f-inp" type="number" id="editKm" placeholder="0"></div>
+      <div class="f-row"><label class="f-label">Vehiculo</label><input class="f-inp" id="editVehiculo" placeholder="Marca modelo año"></div>
+    </div>
     <div class="f-row"><label class="f-label">Notas</label><input class="f-inp" id="editNotas" placeholder="Observaciones, repuestos adicionales..."></div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button onclick="closeEditModal()" class="btn-secondary" style="flex:1;">CANCELAR</button>
@@ -385,9 +392,14 @@ header{position:sticky;top:0;z-index:90;padding:calc(var(--safe-top) + 10px) 16p
             <div class="f-row"><label class="f-label">Kilometraje</label><input class="f-inp" type="number" id="oKm" placeholder="85000"></div>
           </div>
           <div class="g2">
-            <div class="f-row"><label class="f-label">Monto ($)</label><input class="f-inp" type="number" id="oMonto" placeholder="0"></div>
-            <div class="f-row"><label class="f-label">Fecha</label><input class="f-inp" type="date" id="oFecha"></div>
+            <div class="f-row"><label class="f-label">🔩 Repuestos ($)</label><input class="f-inp" type="number" id="oRepuestos" placeholder="0" oninput="calcTotal()"></div>
+            <div class="f-row"><label class="f-label">🔧 Mano de obra ($)</label><input class="f-inp" type="number" id="oManoObra" placeholder="0" oninput="calcTotal()"></div>
           </div>
+          <div style="background:var(--s2);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;">Total</span>
+            <span id="oTotalDisplay" style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:var(--green);">$0</span>
+          </div>
+          <div class="f-row"><label class="f-label">Fecha</label><input class="f-inp" type="date" id="oFecha"></div>
           <div class="f-row"><label class="f-label">Estado inicial</label>
             <select class="f-inp" id="oEstado">
               <option value="Pendiente">Pendiente</option>
@@ -563,7 +575,7 @@ header{position:sticky;top:0;z-index:90;padding:calc(var(--safe-top) + 10px) 16p
 //  CARRERAS GARAGE v3.0
 // ════════════════════════════════════════
 const USUARIOS    = { 'eze': 'robieroten' };
-const SCRIPT_URL  = 'https://script.google.com/macros/s/AKfycbyivm3xw8GTXBe9bI_zBK3sZ6OCBk7_keUAyUoFit7vgYk4SDVt6Slsg7nEZBtC2KAU/exec';
+const SCRIPT_URL  = 'https://script.google.com/macros/s/AKfycby_B_ZBrrUwXfvkI4UTLD4x1OMWHI2AN-bOMHJyvFA9g6mIiAyQk2EeRjbYhXSkzg23/exec';
 const MESES       = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const CATS        = {
   ingresos:  { icon:'💰', color:'#22c55e', bg:'rgba(34,197,94,.12)'   },
@@ -773,7 +785,9 @@ async function agregarOrden() {
   const descripcion = document.getElementById('oDesc').value.trim();
   const vehiculo    = document.getElementById('oVehiculo').value.trim();
   const km          = document.getElementById('oKm').value.trim();
-  const monto       = parseFloat(document.getElementById('oMonto').value)||0;
+  const repuestos   = parseFloat(document.getElementById('oRepuestos').value)||0;
+  const mano_obra   = parseFloat(document.getElementById('oManoObra').value)||0;
+  const monto       = repuestos + mano_obra;
   const fecha       = document.getElementById('oFecha').value;
   const estado      = document.getElementById('oEstado').value;
   const notas       = document.getElementById('oNotas').value.trim();
@@ -784,9 +798,10 @@ async function agregarOrden() {
   const btn = document.getElementById('btnOrden');
   btn.disabled = true; btn.innerHTML = '<span class="spin"></span>GUARDANDO...';
   try {
-    await api({ action:'addOrden', cliente_id, cliente_nombre, vehiculo, km, descripcion, monto, estado, fecha, notas });
-    ['oDesc','oVehiculo','oKm','oNotas'].forEach(id => document.getElementById(id).value='');
-    document.getElementById('oMonto').value=''; document.getElementById('oCliente').value='';
+    await api({ action:'addOrden', cliente_id, cliente_nombre, vehiculo, km, descripcion, monto, repuestos, mano_obra, estado, fecha, notas });
+    ['oDesc','oVehiculo','oKm','oNotas','oRepuestos','oManoObra'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('oTotalDisplay').textContent='$0';
+    document.getElementById('oCliente').value='';
     await loadOrdenes(document.getElementById('oBuscar').value, ordenFiltroActivo);
     if (estado==='Cobrado') await loadMovimientos(mesActual);
     toast('Orden creada');
@@ -1037,11 +1052,14 @@ function openEditModal(id) {
   const o = ordenes.find(o => o.id === id);
   if (!o) return;
   editActivoId = id;
-  document.getElementById('editDesc').value    = o.descripcion || '';
-  document.getElementById('editMonto').value   = o.monto || '';
-  document.getElementById('editKm').value      = o.km || '';
-  document.getElementById('editVehiculo').value= o.vehiculo || '';
-  document.getElementById('editNotas').value   = o.notas || '';
+  document.getElementById('editDesc').value       = o.descripcion || '';
+  document.getElementById('editRepuestos').value  = o.repuestos || '';
+  document.getElementById('editManoObra').value   = o.mano_obra || '';
+  document.getElementById('editKm').value         = o.km || '';
+  document.getElementById('editVehiculo').value   = o.vehiculo || '';
+  document.getElementById('editNotas').value      = o.notas || '';
+  const t = (o.repuestos||0) + (o.mano_obra||0) || o.monto || 0;
+  document.getElementById('editTotalDisplay').textContent = fmt(t);
   document.getElementById('editModal').style.display = 'flex';
 }
 
@@ -1052,7 +1070,9 @@ function closeEditModal() {
 
 async function confirmarEdicion() {
   const descripcion = document.getElementById('editDesc').value.trim();
-  const monto       = parseFloat(document.getElementById('editMonto').value) || 0;
+  const repuestos   = parseFloat(document.getElementById('editRepuestos').value) || 0;
+  const mano_obra   = parseFloat(document.getElementById('editManoObra').value) || 0;
+  const monto       = repuestos + mano_obra;
   const km          = document.getElementById('editKm').value.trim();
   const vehiculo    = document.getElementById('editVehiculo').value.trim();
   const notas       = document.getElementById('editNotas').value.trim();
@@ -1060,13 +1080,25 @@ async function confirmarEdicion() {
   const btn = document.getElementById('btnEdit');
   btn.disabled = true; btn.textContent = 'GUARDANDO...';
   try {
-    await api({ action:'updateOrden', id:editActivoId, descripcion, monto, km, vehiculo, notas });
+    await api({ action:'updateOrden', id:editActivoId, descripcion, monto, repuestos, mano_obra, km, vehiculo, notas });
     closeEditModal();
     await loadOrdenes(document.getElementById('oBuscar').value, ordenFiltroActivo);
     await loadMovimientos(mesActual);
     toast('Orden actualizada');
   } catch(e) { toast('Error: '+e.message); }
   btn.disabled = false; btn.textContent = '✓ GUARDAR CAMBIOS';
+}
+
+// ── CALC TOTALES ─────────────────────────
+function calcTotal() {
+  const r = parseFloat(document.getElementById('oRepuestos').value)||0;
+  const m = parseFloat(document.getElementById('oManoObra').value)||0;
+  document.getElementById('oTotalDisplay').textContent = fmt(r+m);
+}
+function calcEditTotal() {
+  const r = parseFloat(document.getElementById('editRepuestos').value)||0;
+  const m = parseFloat(document.getElementById('editManoObra').value)||0;
+  document.getElementById('editTotalDisplay').textContent = fmt(r+m);
 }
 
 // ── INGRESO RAPIDO ────────────────────────
@@ -1115,6 +1147,10 @@ function renderOrdenes() {
         <button class="e-del" onclick="eliminarOrden(${o.id})">✕</button>
       </div>
       <div class="oc-desc">${o.descripcion}</div>
+      ${(o.repuestos>0||o.mano_obra>0)?`<div style="display:flex;gap:8px;margin:5px 0;flex-wrap:wrap;">
+        ${o.repuestos>0?`<span style="font-size:11px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#f59e0b;border-radius:6px;padding:2px 8px;">🔩 Rep: ${fmt(o.repuestos)}</span>`:''}
+        ${o.mano_obra>0?`<span style="font-size:11px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:#3b82f6;border-radius:6px;padding:2px 8px;">🔧 M.O.: ${fmt(o.mano_obra)}</span>`:''}
+      </div>`:''}
       ${o.notas?`<div class="oc-notas">📝 ${o.notas}</div>`:''}
       <div class="oc-footer">
         <div class="oc-fecha">${fmtF(o.fecha)}</div>
