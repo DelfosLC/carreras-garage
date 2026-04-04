@@ -364,6 +364,7 @@ header{position:sticky;top:0;z-index:90;padding:calc(var(--safe-top) + 10px) 16p
           <div class="stat-card" style="--c:#3b82f6"><div class="sc-label">👷 Empleados</div><div class="sc-val" id="sEmp">$0</div></div>
           <div class="stat-card" style="--c:#818cf8;grid-column:1/-1" onclick="goPage('ordenes')" cursor="pointer"><div class="sc-label">🚗 Ordenes activas este mes</div><div style="display:flex;align-items:baseline;gap:12px;"><div class="sc-val" id="sOrdenes">0</div><div style="font-size:12px;color:var(--text2);margin-bottom:2px;" id="sOrdenesDetalle"></div></div></div>
         </div>
+        <div id="cajaSummary" style="margin-bottom:12px;"></div>
         <div class="chart-card">
           <div class="card-title">Distribucion egresos</div>
           <div id="chartArea"></div>
@@ -995,6 +996,32 @@ function renderResumen(d) {
   nb.textContent=fmt(bal); nb.style.color=bal>0?"var(--green)":bal<0?"var(--red)":"var(--blue2)";
   document.getElementById("balEmoji").textContent=bal>0?"🤑":bal<0?"😬":"😐";
   document.getElementById("balSub").textContent="Egresos: "+fmt(egr);
+
+  // Desglose de caja: efectivo vs transferencia
+  const pagosOrdenes = ordenes.flatMap(o=>o.pagos||[]);
+  const efectOrdenes = pagosOrdenes.filter(p=>p.forma_pago==='Efectivo').reduce((s,p)=>s+p.monto,0);
+  const transOrdenes = pagosOrdenes.filter(p=>p.forma_pago==='Transferencia').reduce((s,p)=>s+p.monto,0);
+  const efectLegacy  = (d.ingresos_legacy||[]).filter(e=>e.extra&&e.extra.includes('Efectivo')).reduce((s,e)=>s+e.monto,0);
+  const transLegacy  = (d.ingresos_legacy||[]).filter(e=>e.extra&&e.extra.includes('Transferencia')).reduce((s,e)=>s+e.monto,0);
+  const efectivo     = efectOrdenes + efectLegacy;
+  const transferencia= transOrdenes + transLegacy;
+  const sinEsp       = Math.max(0, ing - efectivo - transferencia);
+  const cajaEl = document.getElementById('cajaSummary');
+  if (cajaEl) cajaEl.innerHTML = `
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:0;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:var(--text2);margin-bottom:10px;">Desglose de caja</div>
+      <div style="display:flex;flex-direction:column;gap:7px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:13px;color:var(--text2);">💵 Efectivo</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--green);">${fmt(efectivo)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:13px;color:var(--text2);">📲 Transferencia</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--purple);">${fmt(transferencia)}</span>
+        </div>
+        ${sinEsp>0?`<div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;color:var(--text3);">❓ Sin especificar</span><span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--text3);">${fmt(sinEsp)}</span></div>`:''}
+      </div>
+    </div>`;
 
   const maxE=Math.max(emp,rep,gas,1);
   document.getElementById('chartArea').innerHTML=[
